@@ -4,7 +4,7 @@ let make:
     ~href: string,
     ~target: string=?,
     ~style: ReactDOMRe.style,
-    array(ReasonReact.reactElement)
+    array(React.element)
   ) =>
   ReasonReact.componentSpec(
     ReasonReact.stateless,

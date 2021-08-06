@@ -27,12 +27,7 @@ type action =
   | UpdateMatch(string, string, Js.Dict.t(string))
   | SetUnlisten([@bs] (unit => unit));
 
+[@react.component]
 let make:
-  (~history: History.browserHistory=?, array((history => ReasonReact.reactElement))) =>
-  ReasonReact.componentSpec(
-    state,
-    state,
-    ReasonReact.noRetainedProps,
-    ReasonReact.noRetainedProps,
-    action
-  );
+  (~history: History.browserHistory=?, ~children:array((history => React.element))) =>
+  React.element;

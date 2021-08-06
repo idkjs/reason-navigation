@@ -1,36 +1,29 @@
 'use strict';
 
-var List                    = require("bs-platform/lib/js/list.js");
-var Js_exn                  = require("bs-platform/lib/js/js_exn.js");
-var $$String                = require("bs-platform/lib/js/string.js");
-var Caml_format             = require("bs-platform/lib/js/caml_format.js");
-var Caml_string             = require("bs-platform/lib/js/caml_string.js");
-var Str$ReasonNavigation    = require("./Str.bs.js");
-var Caml_builtin_exceptions = require("bs-platform/lib/js/caml_builtin_exceptions.js");
+var List = require("bs-platform/lib/js/list.js");
+var $$String = require("bs-platform/lib/js/string.js");
+var Js_dict = require("bs-platform/lib/js/js_dict.js");
+var Caml_format = require("bs-platform/lib/js/caml_format.js");
+var Caml_option = require("bs-platform/lib/js/caml_option.js");
+var Caml_string = require("bs-platform/lib/js/caml_string.js");
+var Caml_js_exceptions = require("bs-platform/lib/js/caml_js_exceptions.js");
+var Str$ReasonNavigation = require("./Str.bs.js");
 
 function removeTrailingSlash(url) {
-  var lastChar = Caml_string.get(url, (function (param) {
-            return Str$ReasonNavigation.someOr(param, 1);
-          })(Str$ReasonNavigation.length(url)) - 1 | 0);
+  var lastChar = Caml_string.get(url, Str$ReasonNavigation.someOr(Str$ReasonNavigation.length(url), 1) - 1 | 0);
   if (lastChar !== 47) {
     return url;
   } else {
-    return (function (param) {
-                return Str$ReasonNavigation.someOr(param, url);
-              })(Str$ReasonNavigation.sub(url, 0, (function (param) {
-                        return Str$ReasonNavigation.someOr(param, 1);
-                      })(Str$ReasonNavigation.length(url)) - 1 | 0));
+    return Str$ReasonNavigation.someOr(Str$ReasonNavigation.sub(url, 0, Str$ReasonNavigation.someOr(Str$ReasonNavigation.length(url), 1) - 1 | 0), url);
   }
 }
 
 function addLeadingSlash(url) {
-  var match = (function (param) {
-        return Str$ReasonNavigation.someOr(param, "");
-      })(Str$ReasonNavigation.get(url, 0));
+  var match = Str$ReasonNavigation.someOr(Str$ReasonNavigation.get(url, 0), "");
   switch (match) {
-    case "" : 
+    case "" :
         return "/";
-    case "/" : 
+    case "/" :
         return url;
     default:
       return "/" + url;
@@ -38,60 +31,50 @@ function addLeadingSlash(url) {
 }
 
 function hasSearch(url) {
-  var match = $$String.contains(url, /* ":" */58);
-  if (match !== 0) {
-    return /* Search */[(function (param) {
-                  return Str$ReasonNavigation.someOr(param, -1);
-                })(Str$ReasonNavigation.index(url, /* ":" */58))];
+  if ($$String.contains(url, /* ':' */58)) {
+    return /* Search */{
+            _0: Str$ReasonNavigation.someOr(Str$ReasonNavigation.index(url, /* ':' */58), -1)
+          };
   } else {
     return /* NoSearch */0;
   }
 }
 
 function hasHash(url) {
-  var match = $$String.contains(url, /* "#" */35);
-  if (match !== 0) {
-    return /* Hash */[(function (param) {
-                  return Str$ReasonNavigation.someOr(param, -1);
-                })(Str$ReasonNavigation.index(url, /* "#" */35))];
+  if ($$String.contains(url, /* '#' */35)) {
+    return /* Hash */{
+            _0: Str$ReasonNavigation.someOr(Str$ReasonNavigation.index(url, /* '#' */35), -1)
+          };
   } else {
     return /* NoHash */0;
   }
 }
 
 function getInt(params, field) {
-  var match = params[field];
-  if (match !== undefined) {
-    var exit = 0;
-    var x;
-    try {
-      x = Caml_format.caml_int_of_string(match);
-      exit = 1;
-    }
-    catch (raw_exn){
-      var exn = Js_exn.internalToOCamlException(raw_exn);
-      if (exn[0] === Caml_builtin_exceptions.failure) {
-        return /* None */0;
-      } else {
-        throw exn;
-      }
-    }
-    if (exit === 1) {
-      return /* Some */[x];
-    }
-    
-  } else {
-    return /* None */0;
+  var v = Js_dict.get(params, field);
+  if (v === undefined) {
+    return ;
   }
+  var x;
+  try {
+    x = Caml_format.caml_int_of_string(v);
+  }
+  catch (raw_exn){
+    var exn = Caml_js_exceptions.internalToOCamlException(raw_exn);
+    if (exn.RE_EXN_ID === "Failure") {
+      return ;
+    }
+    throw exn;
+  }
+  return x;
 }
 
 function getString(params, field) {
-  var match = params[field];
-  if (match !== undefined) {
-    return /* Some */[match];
-  } else {
-    return /* None */0;
+  var v = Js_dict.get(params, field);
+  if (v !== undefined) {
+    return Caml_option.some(Caml_option.valFromOption(v));
   }
+  
 }
 
 function stringToPath(path, pattern) {
@@ -108,51 +91,48 @@ function stringToPath(path, pattern) {
       } else {
         return /* [] */0;
       }
-    } else if (pattern$1 === "") {
-      return /* [] */0;
-    } else {
-      var match = $$String.contains_from(path$1, 1, /* "/" */47);
-      var match$1;
-      if (match !== 0) {
-        var nextUrlSlash = $$String.index_from(path$1, 1, /* "/" */47);
-        var urlItem = $$String.sub(path$1, 1, nextUrlSlash - 1 | 0);
-        match$1 = /* tuple */[
-          urlItem,
-          $$String.sub(path$1, nextUrlSlash, path$1.length - nextUrlSlash | 0)
-        ];
-      } else {
-        match$1 = /* tuple */[
-          $$String.sub(path$1, 1, path$1.length - 1 | 0),
-          ""
-        ];
-      }
-      var match$2 = $$String.contains_from(pattern$1, 1, /* "/" */47);
-      var match$3;
-      if (match$2 !== 0) {
-        var nextPatternSlash = $$String.index_from(pattern$1, 1, /* "/" */47);
-        var patternItem = $$String.sub(pattern$1, 1, nextPatternSlash - 1 | 0);
-        match$3 = /* tuple */[
-          patternItem,
-          $$String.sub(pattern$1, nextPatternSlash, pattern$1.length - nextPatternSlash | 0)
-        ];
-      } else {
-        match$3 = /* tuple */[
-          $$String.sub(pattern$1, 1, pattern$1.length - 1 | 0),
-          ""
-        ];
-      }
-      _pathsAndPatterns = /* :: */[
-        /* tuple */[
-          match$1[0],
-          match$3[0]
-        ],
-        pathsAndPatterns
-      ];
-      _pattern = match$3[1];
-      _path = match$1[1];
-      continue ;
-      
     }
+    if (pattern$1 === "") {
+      return /* [] */0;
+    }
+    var match;
+    if ($$String.contains_from(path$1, 1, /* '/' */47)) {
+      var nextUrlSlash = $$String.index_from(path$1, 1, /* '/' */47);
+      var urlItem = $$String.sub(path$1, 1, nextUrlSlash - 1 | 0);
+      match = [
+        urlItem,
+        $$String.sub(path$1, nextUrlSlash, path$1.length - nextUrlSlash | 0)
+      ];
+    } else {
+      match = [
+        $$String.sub(path$1, 1, path$1.length - 1 | 0),
+        ""
+      ];
+    }
+    var match$1;
+    if ($$String.contains_from(pattern$1, 1, /* '/' */47)) {
+      var nextPatternSlash = $$String.index_from(pattern$1, 1, /* '/' */47);
+      var patternItem = $$String.sub(pattern$1, 1, nextPatternSlash - 1 | 0);
+      match$1 = [
+        patternItem,
+        $$String.sub(pattern$1, nextPatternSlash, pattern$1.length - nextPatternSlash | 0)
+      ];
+    } else {
+      match$1 = [
+        $$String.sub(pattern$1, 1, pattern$1.length - 1 | 0),
+        ""
+      ];
+    }
+    _pathsAndPatterns = {
+      hd: [
+        match[0],
+        match$1[0]
+      ],
+      tl: pathsAndPatterns
+    };
+    _pattern = match$1[1];
+    _path = match[1];
+    continue ;
   };
 }
 
@@ -161,106 +141,91 @@ function parseUrl(pathsAndPatterns) {
     while(true) {
       var pathsAndPatterns = _pathsAndPatterns;
       var search = _search;
-      if (pathsAndPatterns) {
-        var rest = pathsAndPatterns[1];
-        var match = pathsAndPatterns[0];
-        var patternHead = match[1];
-        var pathHead = match[0];
-        if (rest) {
-          var match$1 = hasSearch(patternHead);
-          if (match$1) {
-            var s = $$String.sub(patternHead, 1, patternHead.length - 1 | 0);
-            params[s] = pathHead;
-            _pathsAndPatterns = rest;
-            _search = s + ("=" + (pathHead + ("&" + search)));
-            continue ;
-            
-          } else {
-            _pathsAndPatterns = rest;
-            continue ;
-            
-          }
-        } else {
-          var match$2 = hasSearch(patternHead);
-          if (match$2) {
-            var s$1 = $$String.sub(patternHead, 1, patternHead.length - 1 | 0);
-            params[s$1] = pathHead;
-            var search$1 = "?" + (s$1 + ("=" + (pathHead + ("&" + search))));
-            return /* record */[
-                    /* search */search$1,
-                    /* hash */hash,
-                    /* params */params
-                  ];
-          } else {
-            var search$2 = "?" + search;
-            return /* record */[
-                    /* search */search$2,
-                    /* hash */hash,
-                    /* params */params
-                  ];
-          }
-        }
-      } else {
-        return /* record */[
-                /* search */search,
-                /* hash */hash,
-                /* params */params
-              ];
+      if (!pathsAndPatterns) {
+        return {
+                search: search,
+                hash: hash,
+                params: params
+              };
       }
+      var rest = pathsAndPatterns.tl;
+      var match = pathsAndPatterns.hd;
+      var patternHead = match[1];
+      var pathHead = match[0];
+      if (rest) {
+        var match$1 = hasSearch(patternHead);
+        if (match$1) {
+          var s = $$String.sub(patternHead, 1, patternHead.length - 1 | 0);
+          params[s] = pathHead;
+          _pathsAndPatterns = rest;
+          _search = s + ("=" + (pathHead + ("&" + search)));
+          continue ;
+        }
+        _pathsAndPatterns = rest;
+        continue ;
+      }
+      var match$2 = hasSearch(patternHead);
+      if (match$2) {
+        var s$1 = $$String.sub(patternHead, 1, patternHead.length - 1 | 0);
+        params[s$1] = pathHead;
+        _pathsAndPatterns = /* [] */0;
+        _search = "?" + (s$1 + ("=" + (pathHead + ("&" + search))));
+        continue ;
+      }
+      _pathsAndPatterns = /* [] */0;
+      _search = "?" + search;
+      continue ;
     };
   };
   var search = "";
   var hash = "";
-  var params = { };
-  var pathsAndPatterns$1 = pathsAndPatterns;
-  if (pathsAndPatterns$1) {
-    var rest = pathsAndPatterns$1[1];
-    var match = pathsAndPatterns$1[0];
-    var patternHead = match[1];
-    var pathHead = match[0];
-    var match$1 = hasHash(pathHead);
-    var match$2 = hasSearch(patternHead);
-    if (match$1) {
-      var loc = match$1[0];
-      if (match$2) {
-        var h = $$String.sub(pathHead, loc, pathHead.length - loc | 0);
-        var p = $$String.sub(pathHead, 0, loc);
-        var s = $$String.sub(patternHead, 1, patternHead.length - 1 | 0);
-        params[s] = p;
-        return remainingIterations(s + ("=" + p), h, params, rest);
-      } else {
-        var h$1 = $$String.sub(pathHead, loc, pathHead.length - loc | 0);
-        return remainingIterations("?", h$1, params, rest);
-      }
-    } else if (match$2) {
-      var s$1 = $$String.sub(patternHead, 1, patternHead.length - 1 | 0);
-      params[s$1] = pathHead;
-      return remainingIterations(s$1 + ("=" + pathHead), "", params, rest);
-    } else {
-      return remainingIterations("", "", params, rest);
-    }
-  } else {
-    return /* record */[
-            /* search */search,
-            /* hash */hash,
-            /* params */params
-          ];
+  var params = {};
+  if (!pathsAndPatterns) {
+    return {
+            search: search,
+            hash: hash,
+            params: params
+          };
   }
+  var rest = pathsAndPatterns.tl;
+  var match = pathsAndPatterns.hd;
+  var patternHead = match[1];
+  var pathHead = match[0];
+  var match$1 = hasHash(pathHead);
+  var match$2 = hasSearch(patternHead);
+  if (match$1) {
+    var loc = match$1._0;
+    if (match$2) {
+      var h = $$String.sub(pathHead, loc, pathHead.length - loc | 0);
+      var p = $$String.sub(pathHead, 0, loc);
+      var s = $$String.sub(patternHead, 1, patternHead.length - 1 | 0);
+      params[s] = p;
+      return remainingIterations(s + ("=" + p), h, params, rest);
+    }
+    var h$1 = $$String.sub(pathHead, loc, pathHead.length - loc | 0);
+    return remainingIterations("?", h$1, params, rest);
+  }
+  if (!match$2) {
+    return remainingIterations("", "", params, rest);
+  }
+  var s$1 = $$String.sub(patternHead, 1, patternHead.length - 1 | 0);
+  params[s$1] = pathHead;
+  return remainingIterations(s$1 + ("=" + pathHead), "", params, rest);
 }
 
 function isPathCompliant(pathsAndPatterns) {
   var normalizedPathsAndPatterns;
   if (pathsAndPatterns) {
-    var match = pathsAndPatterns[0];
+    var match = pathsAndPatterns.hd;
     var path = match[0];
-    var match$1 = hasHash(path);
-    normalizedPathsAndPatterns = match$1 ? /* :: */[
-        /* tuple */[
-          $$String.sub(path, 0, match$1[0]),
-          match[1]
-        ],
-        pathsAndPatterns[1]
-      ] : pathsAndPatterns;
+    var loc = hasHash(path);
+    normalizedPathsAndPatterns = loc ? ({
+          hd: [
+            $$String.sub(path, 0, loc._0),
+            match[1]
+          ],
+          tl: pathsAndPatterns.tl
+        }) : pathsAndPatterns;
   } else {
     normalizedPathsAndPatterns = pathsAndPatterns;
   }
@@ -268,9 +233,9 @@ function isPathCompliant(pathsAndPatterns) {
                 var pattern = param[1];
                 var match = hasSearch(pattern);
                 if (match) {
-                  return /* true */1;
+                  return true;
                 } else {
-                  return +(param[0] === pattern);
+                  return param[0] === pattern;
                 }
               }), normalizedPathsAndPatterns);
 }
@@ -280,23 +245,22 @@ function matchPath(url, pattern) {
   var formatPattern = pattern === "/" ? pattern : removeTrailingSlash(addLeadingSlash(pattern));
   var pathsAndPatterns = stringToPath(formatUrl, formatPattern);
   if (pathsAndPatterns && isPathCompliant(pathsAndPatterns)) {
-    return /* Some */[/* tuple */[
-              formatUrl,
-              pathsAndPatterns
-            ]];
-  } else {
-    return /* None */0;
+    return [
+            formatUrl,
+            pathsAndPatterns
+          ];
   }
+  
 }
 
 exports.removeTrailingSlash = removeTrailingSlash;
-exports.addLeadingSlash     = addLeadingSlash;
-exports.hasSearch           = hasSearch;
-exports.hasHash             = hasHash;
-exports.getInt              = getInt;
-exports.getString           = getString;
-exports.stringToPath        = stringToPath;
-exports.parseUrl            = parseUrl;
-exports.isPathCompliant     = isPathCompliant;
-exports.matchPath           = matchPath;
+exports.addLeadingSlash = addLeadingSlash;
+exports.hasSearch = hasSearch;
+exports.hasHash = hasHash;
+exports.getInt = getInt;
+exports.getString = getString;
+exports.stringToPath = stringToPath;
+exports.parseUrl = parseUrl;
+exports.isPathCompliant = isPathCompliant;
+exports.matchPath = matchPath;
 /* No side effect */

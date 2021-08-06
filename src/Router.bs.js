@@ -1,128 +1,118 @@
 'use strict';
 
-var Block                = require("bs-platform/lib/js/block.js");
-var Curry                = require("bs-platform/lib/js/curry.js");
-var Caml_array           = require("bs-platform/lib/js/caml_array.js");
-var ReasonReact          = require("reason-react/src/ReasonReact.js");
-var CreateBrowserHistory = require("history/createBrowserHistory");
+var Curry = require("bs-platform/lib/js/curry.js");
+var React = require("react");
+var Caml_array = require("bs-platform/lib/js/caml_array.js");
+var Caml_option = require("bs-platform/lib/js/caml_option.js");
+var CreateBrowserHistory = require("history/createBrowserHistory").default;
 
-var component = ReasonReact.reducerComponent("Router");
-
-function make($staropt$star, children) {
-  var history = $staropt$star ? $staropt$star[0] : CreateBrowserHistory.default();
-  var newrecord = component.slice();
-  newrecord[/* didMount */4] = (function (param) {
-      var reduce = param[/* reduce */1];
-      var unsub = history.listen((function ($$location) {
-              Curry._2(reduce, (function () {
-                      return /* UpdatePath */Block.__(3, [$$location.pathname]);
-                    }), /* () */0);
-              return /* () */0;
-            }));
-      Curry._2(reduce, (function () {
-              return /* SetUnlisten */Block.__(5, [unsub]);
-            }), /* () */0);
-      return /* NoUpdate */0;
-    });
-  newrecord[/* willUnmount */6] = (function (self) {
-      return self[/* state */2][/* unlisten */4]();
-    });
-  newrecord[/* render */9] = (function (param) {
-      var reduce = param[/* reduce */1];
-      return Curry._1(Caml_array.caml_array_get(children, 0), /* record */[
-                  /* state */param[/* state */2],
-                  /* actions : record */[
-                    /* push */(function (path) {
-                        return Curry._2(reduce, (function () {
-                                      return /* Push */Block.__(0, [path]);
-                                    }), /* () */0);
-                      }),
-                    /* replace */(function (path) {
-                        return Curry._2(reduce, (function () {
-                                      return /* Replace */Block.__(1, [path]);
-                                    }), /* () */0);
-                      }),
-                    /* updateMatch */(function (search, hash, params) {
-                        return Curry._2(reduce, (function () {
-                                      return /* UpdateMatch */Block.__(4, [
-                                                search,
-                                                hash,
-                                                params
-                                              ]);
-                                    }), /* () */0);
-                      })
-                  ]
-                ]);
-    });
-  newrecord[/* initialState */10] = (function () {
-      return /* record */[
-              /* path */history.location.pathname,
-              /* search */"",
-              /* hash */"",
-              /* params */{ },
-              /* unlisten */(function () {
-                  return /* () */0;
-                })
-            ];
-    });
-  newrecord[/* reducer */12] = (function (action, state) {
-      if (typeof action === "number") {
-        if (action) {
-          return /* SideEffects */Block.__(2, [(function () {
-                        return history.goForward();
-                      })]);
-        } else {
-          return /* SideEffects */Block.__(2, [(function () {
-                        return history.goBack();
-                      })]);
-        }
-      } else {
-        switch (action.tag | 0) {
-          case 0 : 
-              var path = action[0];
-              return /* SideEffects */Block.__(2, [(function () {
-                            return history.push(path);
-                          })]);
-          case 1 : 
-              var path$1 = action[0];
-              return /* SideEffects */Block.__(2, [(function () {
-                            return history.replace(path$1);
-                          })]);
-          case 2 : 
-              var n = action[0];
-              return /* SideEffects */Block.__(2, [(function () {
-                            return history.go(n);
-                          })]);
-          case 3 : 
-              return /* Update */Block.__(0, [/* record */[
-                          /* path */action[0],
-                          /* search */state[/* search */1],
-                          /* hash */state[/* hash */2],
-                          /* params */state[/* params */3],
-                          /* unlisten */state[/* unlisten */4]
-                        ]]);
-          case 4 : 
-              return /* Update */Block.__(0, [/* record */[
-                          /* path */state[/* path */0],
-                          /* search */action[0],
-                          /* hash */action[1],
-                          /* params */action[2],
-                          /* unlisten */state[/* unlisten */4]
-                        ]]);
-          case 5 : 
-              return /* Update */Block.__(0, [/* record */[
-                          /* path */state[/* path */0],
-                          /* search */state[/* search */1],
-                          /* hash */state[/* hash */2],
-                          /* params */state[/* params */3],
-                          /* unlisten */action[0]
-                        ]]);
-          
-        }
-      }
-    });
-  return newrecord;
+function Router(Props) {
+  var historyOpt = Props.history;
+  var children = Props.children;
+  var history = historyOpt !== undefined ? Caml_option.valFromOption(historyOpt) : CreateBrowserHistory();
+  var initialState_path = history.location.pathname;
+  var initialState_params = {};
+  var initialState_unlisten = function () {
+    
+  };
+  var initialState = {
+    path: initialState_path,
+    search: "",
+    hash: "",
+    params: initialState_params,
+    unlisten: initialState_unlisten
+  };
+  var match = React.useReducer((function (state, action) {
+          if (typeof action === "number") {
+            if (action === /* GoBack */0) {
+              history.goBack();
+              return state;
+            }
+            history.goForward();
+            return state;
+          } else {
+            switch (action.TAG | 0) {
+              case /* Push */0 :
+                  history.push(action._0);
+                  return state;
+              case /* Replace */1 :
+                  history.replace(action._0);
+                  return state;
+              case /* Go */2 :
+                  history.go(action._0);
+                  return state;
+              case /* UpdatePath */3 :
+                  return {
+                          path: action._0,
+                          search: state.search,
+                          hash: state.hash,
+                          params: state.params,
+                          unlisten: state.unlisten
+                        };
+              case /* UpdateMatch */4 :
+                  return {
+                          path: state.path,
+                          search: action._0,
+                          hash: action._1,
+                          params: action._2,
+                          unlisten: state.unlisten
+                        };
+              case /* SetUnlisten */5 :
+                  return {
+                          path: state.path,
+                          search: state.search,
+                          hash: state.hash,
+                          params: state.params,
+                          unlisten: action._0
+                        };
+              
+            }
+          }
+        }), initialState);
+  var dispatch = match[1];
+  React.useEffect((function () {
+          var unsub = history.listen(function ($$location) {
+                Curry._1(dispatch, {
+                      TAG: /* UpdatePath */3,
+                      _0: $$location.pathname
+                    });
+                
+              });
+          return (function (param) {
+                    return Curry._1(dispatch, {
+                                TAG: /* SetUnlisten */5,
+                                _0: unsub
+                              });
+                  });
+        }), []);
+  return Curry._1(Caml_array.get(children, 0), {
+              state: match[0],
+              actions: {
+                push: (function (path) {
+                    return Curry._1(dispatch, {
+                                TAG: /* Push */0,
+                                _0: path
+                              });
+                  }),
+                replace: (function (path) {
+                    return Curry._1(dispatch, {
+                                TAG: /* Replace */1,
+                                _0: path
+                              });
+                  }),
+                updateMatch: (function (search, hash, params) {
+                    return Curry._1(dispatch, {
+                                TAG: /* UpdateMatch */4,
+                                _0: search,
+                                _1: hash,
+                                _2: params
+                              });
+                  })
+              }
+            });
 }
 
+var make = Router;
+
 exports.make = make;
-/* component Not a pure module */
+/* react Not a pure module */
