@@ -1,9 +1,23 @@
 {
   "name": "reason-navigation",
-  "sources": "src",
-  "reason": { "react-jsx": 3 },
-  "bsc-flags": ["-bs-no-version-header"],
-  "bs-dependencies": ["reason-react"],
+  "sources": [
+    {
+      "dir": "src"
+    },
+    {
+      "dir": "example",
+      "dev": true
+    }
+  ],
+  "reason": {
+    "react-jsx": 3
+  },
+  "bsc-flags": [
+    "-bs-no-version-header"
+  ],
+  "bs-dependencies": [
+    "reason-react"
+  ],
   "namespace": true,
   "suffix": ".bs.js",
   "package-specs": {

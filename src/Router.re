@@ -40,6 +40,7 @@ let make =
       ~history: History.browserHistory=History.createBrowserHistory(),
       ~children,
     ) => {
+  // let history = History.createBrowserHistory();
   let initialState = {
     path: history##location##pathname,
     search: "",

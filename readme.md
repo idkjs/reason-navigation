@@ -32,17 +32,16 @@ yarn install reason-navigation
 ## Example
 
 ```reason
-let component = ReasonReact.statelessComponent("App");
 
-let make = (_children) => {
-  ...component,
-  render: (_self) =>
+[@react.component]
+let make = () => {
+
     <Router>
       (
         (history) =>
           <div>
-            <h1> (U.se("Reason Router")) </h1>
-            <Link history href="/game"> (U.se("GAME")) </Link>
+            <h1> (React.string("Reason Router")) </h1>
+            <Link history href="/game"> (React.string("GAME")) </Link>
             <Route history path="/" render=(() => <Landing history />) />
             <Route history path="/game" render=(() => <Canvas history />) />
             <Route
@@ -54,7 +53,7 @@ let make = (_children) => {
                   | Some(v) => Js.log(v)
                   | None => Js.log("None")
                   };
-                  <p> (ReasonReact.stringToElement("Query params!")) </p>
+                  <p> (React.string("Query params!")) </p>
                 }
               )
             />
@@ -67,13 +66,13 @@ let make = (_children) => {
 
 ## Navigation Components
 
-### `<Router children: (history) => ReasonReact.element/>`
+### `<Router children: (history) => React.element/>`
 
 Router takes a function as a child, with a parameter that is passed a history
 object. The body should be a single reason-react component, like a `<div />`
 that wraps a bunch of child `<Route />` components.
 
-### `<Route history: Router.history path: string render: unit => ReasonReact.element />`
+### `<Route history: Router.history path: string render: unit => React.element />`
 
 Route needs to be passed the `Router.history` record that contains data in order
 to determine whether it should render on a certain path or not. It also requires

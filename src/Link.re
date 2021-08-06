@@ -1,4 +1,4 @@
-let component = ReasonReact.statelessComponent("Link");
+
 
 let getLinkEventData = (event, history: Router.history, href: string, target: string) => {
   let modified =
@@ -14,10 +14,9 @@ let getLinkEventData = (event, history: Router.history, href: string, target: st
   | _ => ()
   }
 };
+[@react.component]
+let make = (~history: Router.history, ~href: string, ~target: string="", ~style, ~children) => {
 
-let make = (~history: Router.history, ~href: string, ~target: string="", ~style, children) => {
-  ...component,
-  render: (_self) =>
     <a href onClick=((ev) => getLinkEventData(ev, history, href, target)) style>
       (React.array(children))
     </a>

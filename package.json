@@ -6,6 +6,7 @@
   "author": "Kennet Postigo <kennetfpostigo@gmail.com>",
   "license": "MIT",
   "scripts": {
+    "format": "find src -name \"*.re\" -or -name \"*.rei\"  | xargs bsrefmt --in-place",
     "build": "bsb -make-world",
     "start": "bsb -make-world -w",
     "clean": "bsb -clean-world"
